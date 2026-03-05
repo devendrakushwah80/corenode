@@ -1,0 +1,13 @@
+[
+  {
+    "orderId":   "CNA-SAMPLE-001",
+    "plan":      "CORE–EMBER+",
+    "type":      "Minecraft Hosting",
+    "price":     480,
+    "utr":       "416521234567",
+    "name":      "Sample Customer",
+    "email":     "customer@example.com",
+    "status":    "Pending",
+    "createdAt": "2025-01-01T10:00:00.000Z"
+  }
+]

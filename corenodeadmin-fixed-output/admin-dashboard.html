@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard – CoreNodeAdmin</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  
+  <style>
+    .active-filter { background: var(--accent) !important; color:#fff !important; border-color:var(--accent) !important; }
+
+    /* Plan Manager */
+    .plan-row td { vertical-align: middle; }
+    .plan-edit-input {
+      background: var(--bg-base); border: 1px solid var(--border);
+      border-radius: 5px; padding: 0.3rem 0.5rem;
+      color: var(--text-primary); font-size: 0.82rem; width: 100%;
+      outline: none;
+    }
+    .plan-edit-input:focus { border-color: var(--accent); }
+
+    /* Approval modal */
+    .approval-modal { max-width: 420px; }
+
+    /* Stock badge */
+    .stock-badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+    }
+    .stock-ok       { background: rgba(22,163,74,0.12); color:#4ade80; }
+    .stock-low      { background: rgba(217,119,6,0.12); color:#fbbf24; }
+    .stock-out      { background: rgba(220,38,38,0.12); color:#f87171; }
+
+    /* Pipeline steps */
+    .pipeline-step {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 0.82rem; color: var(--text-secondary);
+      padding: 0.35rem 0; border-bottom: 1px solid var(--border);
+      transition: opacity .2s;
+    }
+    .pipeline-step:last-child { border-bottom: none; }
+    .pstep-icon { font-size: 0.95rem; width: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="admin-sidebar" id="admin-sidebar">
+  <div class="admin-sidebar-header">
+    <div style="display:flex;align-items:center;gap:0.6rem;font-size:1rem;font-weight:800;">
+      <div class="logo-icon">CN</div>CoreNodeAdmin
+    </div>
+    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;padding-left:0.15rem">Admin Panel</div>
+  </div>
+
+  <nav class="admin-nav">
+    <button class="admin-nav-item active" data-section="orders"   onclick="switchSection('orders',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+      Orders
+    </button>
+    <button class="admin-nav-item" data-section="support"  onclick="switchSection('support',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+      Support Tickets
+      <span id="support-badge" class="cart-count hidden" style="margin-left:auto">0</span>
+    </button>
+    <button class="admin-nav-item" data-section="plans"    onclick="switchSection('plans',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6"/></svg>
+      Plan Manager
+    </button>
+    <button class="admin-nav-item" data-section="settings" onclick="switchSection('settings',this)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Payment Settings
+    </button>
+  </nav>
+
+  <div style="padding:1rem;border-top:1px solid var(--border);">
+    <button onclick="AdminAuth.logout()" class="btn btn-ghost btn-sm btn-full" style="justify-content:flex-start;gap:0.6rem">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+      Logout
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<!-- Admin sidebar backdrop for mobile -->
+<div id="admin-sidebar-backdrop" class="admin-sidebar-backdrop"></div>
+
+<div class="admin-main">
+
+  <header class="admin-topbar">
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <button class="admin-mobile-toggle" id="admin-sidebar-toggle" aria-label="Toggle menu">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      </button>
+      <h1 id="page-title" style="font-size:0.95rem;font-weight:700">Orders</h1>
+    </div>
+    <span style="font-size:0.8rem;color:var(--text-muted)">
+      <span id="admin-user-email" style="color:var(--accent);font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle"></span>
+    </span>
+  </header>
+
+  <main class="admin-content">
+
+    <!-- ══════════════ ORDERS SECTION ══════════════ -->
+    <section id="section-orders">
+      <div class="dash-stats" style="margin-bottom:1.5rem">
+        <div class="dash-stat"><div class="dash-stat-label">Total Orders</div><div class="dash-stat-value" id="stat-total">0</div><div class="dash-stat-sub">All time</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">Pending</div><div class="dash-stat-value" id="stat-pending" style="color:var(--warning)">0</div><div class="dash-stat-sub">Awaiting</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">Approved</div><div class="dash-stat-value" id="stat-approved" style="color:var(--success)">0</div><div class="dash-stat-sub">Active</div></div>
+        <div class="dash-stat"><div class="dash-stat-label">Revenue</div><div class="dash-stat-value" id="stat-revenue" style="color:var(--accent)">₹0</div><div class="dash-stat-sub">Approved</div></div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-sm btn-secondary active-filter" data-filter="all"      onclick="filterOrders('all',this)">All</button>
+          <button class="btn btn-sm btn-secondary"               data-filter="Pending"  onclick="filterOrders('Pending',this)">Pending</button>
+          <button class="btn btn-sm btn-secondary"               data-filter="Approved" onclick="filterOrders('Approved',this)">Approved</button>
+          <button class="btn btn-sm btn-secondary"               data-filter="Rejected" onclick="filterOrders('Rejected',this)">Rejected</button>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="clearAllOrders()">Clear All</button>
+      </div>
+
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Order ID</th><th>Customer</th><th>Plan</th><th>Type</th>
+            <th>Price</th><th>UTR</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+      <div id="orders-empty" class="hidden" style="text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No orders found.</div>
+    </section>
+
+    <!-- ══════════════ SUPPORT SECTION ══════════════ -->
+    <section id="section-support" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h2 style="font-size:1.1rem;margin-bottom:0.2rem">Support Tickets</h2>
+          <p style="font-size:0.83rem;color:var(--text-secondary)">Customer support requests submitted from the orders page.</p>
+        </div>
+        <span style="font-size:0.82rem;color:var(--text-muted)">Open: <strong id="stat-tickets-open" style="color:var(--warning)">0</strong></span>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Ticket ID</th><th>Email</th><th>Order Ref</th><th>Message</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="support-tickets-tbody"></tbody>
+        </table>
+      </div>
+      <div id="support-tickets-empty" class="hidden" style="text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No support tickets yet.</div>
+    </section>
+
+    <!-- ══════════════ PLAN MANAGER SECTION ══════════════ -->
+    <section id="section-plans" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h2 style="font-size:1.1rem;margin-bottom:0.2rem">Plan Manager</h2>
+          <p style="font-size:0.83rem;color:var(--text-secondary)">Edit prices, specs, stock. Changes update the frontend immediately. Showing all nodes (🔥 AMD EPYC + 💠 Intel Xeon).</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openAddPlanModal()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          Add Plan
+        </button>
+      </div>
+      <div id="plan-msg" class="hidden" style="margin-bottom:1rem;"></div>
+      <div class="data-table-wrap">
+        <table class="data-table" style="min-width:750px">
+          <thead><tr>
+            <th>Plan Name</th><th>Type</th><th>RAM/vCores</th><th>NVMe</th>
+            <th>Price (₹)</th><th>Stock</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="plans-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ══════════════ PAYMENT SETTINGS SECTION ══════════════ -->
+    <section id="section-settings" style="display:none">
+      <div style="max-width:600px;">
+        <div style="margin-bottom:1.25rem;">
+          <h2 style="font-size:1.1rem;margin-bottom:0.25rem">Payment Settings</h2>
+          <p style="font-size:0.85rem;color:var(--text-secondary)">Update your payment QR and UPI ID.</p>
+        </div>
+        <div id="settings-msg" class="hidden" style="margin-bottom:1rem;"></div>
+        <div class="settings-card" style="margin-bottom:1rem;">
+          <div class="settings-card-header">Payment QR Code</div>
+          <div class="settings-card-body">
+            <div style="display:flex;align-items:flex-start;gap:1.5rem;flex-wrap:wrap;">
+              <div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-weight:600">Current QR</div>
+                <img id="settings-qr-preview" src="assets/images/payment-qr.png" alt="QR" class="qr-preview" />
+              </div>
+              <div style="flex:1;min-width:200px;">
+                <div class="form-group">
+                  <label class="form-label" for="settings-qr-file">Upload New QR Code</label>
+                  <input type="file" id="settings-qr-file" accept="image/*" class="form-input" style="padding:0.45rem;" />
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.3rem">PNG, JPG · Max 2MB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="settings-card" style="margin-bottom:1rem;">
+          <div class="settings-card-header">UPI ID</div>
+          <div class="settings-card-body">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="settings-upi">UPI ID / Payment Address</label>
+              <input type="text" id="settings-upi" class="form-input" placeholder="yourname@upi" />
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:0.75rem;">
+          <button id="settings-save" class="btn btn-primary">Save Settings</button>
+          <button id="settings-reset" class="btn btn-ghost">Reset to Defaults</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- end admin-main -->
+</div><!-- end admin-layout -->
+
+<!-- ══════════════ APPROVAL MODAL ══════════════ -->
+<div id="approval-modal-overlay" class="modal-overlay" role="dialog">
+  <div class="modal approval-modal" style="max-width:480px">
+    <div class="modal-header">
+      <div>
+        <h3 style="display:flex;align-items:center;gap:0.5rem">
+          <span>🚀</span> Approve &amp; Provision Server
+        </h3>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.1rem">
+          Credentials will be saved + emailed to customer automatically
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeApprovalModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="approval-order-id" />
+
+      <!-- Order summary strip -->
+      <div style="background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius);padding:0.85rem 1rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap">
+        <div>
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.15rem">Plan</div>
+          <div id="approval-plan-label" style="font-weight:700;color:var(--text-primary);font-size:0.9rem"></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.15rem">Customer</div>
+          <div id="approval-email-label" style="font-weight:600;color:var(--accent);font-size:0.82rem"></div>
+        </div>
+      </div>
+
+      <!-- Auto-generate toggle -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding:0.7rem 0.9rem;background:rgba(0,255,156,.04);border:1px solid rgba(0,255,156,.15);border-radius:var(--radius)">
+        <div>
+          <div style="font-size:0.82rem;font-weight:600;color:var(--text-primary)">Auto-generate credentials</div>
+          <div style="font-size:0.73rem;color:var(--text-muted)">Creates a random username &amp; strong password</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:42px;height:22px;cursor:pointer">
+          <input type="checkbox" id="auto-gen-toggle" style="opacity:0;width:0;height:0;position:absolute" onchange="toggleAutoGen(this.checked)" />
+          <span id="auto-gen-slider" style="position:absolute;inset:0;background:var(--border);border-radius:11px;transition:.2s;cursor:pointer">
+            <span style="position:absolute;left:3px;top:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;display:block" id="auto-gen-knob"></span>
+          </span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="approval-panel-link">Panel URL</label>
+        <input class="form-input" id="approval-panel-link" type="url" value="https://panel.corenode.in" placeholder="https://panel.corenode.in" />
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="approval-username">Username</label>
+          <input class="form-input" id="approval-username" type="text" placeholder="auto_1234" />
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label" for="approval-password">Password</label>
+          <div style="position:relative">
+            <input class="form-input" id="approval-password" type="text" placeholder="StrongPass#1" style="padding-right:2.5rem" />
+            <button type="button" onclick="document.getElementById('approval-password').value=AutoProvision.generatePassword()" title="Regenerate" style="position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;font-size:0.9rem">🔄</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:0.75rem">
+        <label class="form-label" for="approval-note">Note to customer <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+        <textarea class="form-input" id="approval-note" rows="2" placeholder="e.g. Server is on Node-3. Contact support if you face any issues." style="resize:vertical"></textarea>
+      </div>
+
+      <!-- Status result -->
+      <div id="approval-result" style="display:none;padding:0.75rem 1rem;border-radius:var(--radius);margin-top:0.5rem;font-size:0.83rem;line-height:1.5"></div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:1rem">
+        <button class="btn btn-success" id="confirm-approve-btn" style="flex:1" onclick="confirmApproval()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          Approve &amp; Send Email
+        </button>
+        <button class="btn btn-ghost" onclick="closeApprovalModal()">Cancel</button>
+      </div>
+
+      <!-- Pipeline steps (shown during processing) -->
+      <div id="approval-pipeline" style="display:none;margin-top:1rem;padding:0.85rem 1rem;background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius)">
+        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:0.75rem">Processing…</div>
+        <div class="pipeline-step" id="pstep-db">
+          <span class="pstep-icon">⏳</span>
+          <span>Saving credentials to database</span>
+        </div>
+        <div class="pipeline-step" id="pstep-email">
+          <span class="pstep-icon">⏳</span>
+          <span>Sending email to customer</span>
+        </div>
+        <div class="pipeline-step" id="pstep-done">
+          <span class="pstep-icon">⏳</span>
+          <span>Finalising order</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ ADD PLAN MODAL ══════════════ -->
+<div id="add-plan-modal-overlay" class="modal-overlay" role="dialog">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>Add New Plan</h3>
+      <button class="modal-close" onclick="closeAddPlanModal()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <div class="form-group">
+          <label class="form-label">Plan ID</label>
+          <input class="form-input" id="np-id" placeholder="mc-custom-1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Plan Name</label>
+          <input class="form-input" id="np-name" placeholder="CORE–CUSTOM" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="np-type">
+            <option value="Minecraft Hosting">Minecraft Hosting</option>
+            <option value="VPS Server">VPS Server</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Node</label>
+          <select class="form-select" id="np-node">
+            <option value="amd">🔥 AMD EPYC (Premium)</option>
+            <option value="intel">💠 Intel Xeon (Budget)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price (₹/mo)</label>
+          <input class="form-input" id="np-price" type="number" placeholder="500" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">RAM</label>
+          <input class="form-input" id="np-ram" placeholder="8GB" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">vCores</label>
+          <input class="form-input" id="np-vcores" type="number" placeholder="2" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">NVMe</label>
+          <input class="form-input" id="np-nvme" placeholder="50GB" />
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Stock</label>
+          <input class="form-input" id="np-stock" type="number" placeholder="10" />
+        </div>
+      </div>
+        <button class="btn btn-primary btn-full" onclick="saveNewPlan()">Add Plan</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase.js"></script>
+<script src="config/pricing.js"></script>
+<script src="assets/js/admin.js"></script>
+<script src="assets/js/settings.js"></script>
+<script src="assets/js/support.js"></script>
+<script src="assets/js/auto-provision.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════
+   SECTION SWITCHING
+═══════════════════════════════════════════════════════ */
+function switchSection(name, btn) {
+  document.querySelectorAll('[data-section]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  ['orders','support','plans','settings'].forEach(s => {
+    const el = document.getElementById('section-'+s);
+    if (el) el.style.display = s === name ? '' : 'none';
+  });
+  document.getElementById('page-title').textContent = { orders:'Orders', support:'Support Tickets', plans:'Plan Manager', settings:'Payment Settings' }[name] || name;
+  if (name === 'support') SupportAdmin.renderTickets();
+  if (name === 'plans')   renderPlans();
+  if (window.innerWidth < 768) document.getElementById('admin-sidebar').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════════════
+   ORDERS  (Supabase-first, localStorage fallback)
+═══════════════════════════════════════════════════════ */
+let currentFilter = 'all';
+let _adminOrders  = [];
+
+async function loadOrders() {
+  if (typeof DB !== 'undefined') {
+    const { data, error } = await DB.getAllOrders();
+    if (!error) { _adminOrders = data||[]; return _adminOrders; }
+  }
+  // Fallback localStorage
+  try { _adminOrders = JSON.parse(localStorage.getItem('cna_orders') || '[]'); }
+  catch(e) { _adminOrders = []; }
+  return _adminOrders;
+}
+
+async function saveOrderUpdate(id, fields) {
+  if (typeof DB !== 'undefined') {
+    const { error } = await DB.updateOrder(id, fields);
+    if (!error) return true;
+  }
+  // Fallback localStorage
+  const orders = JSON.parse(localStorage.getItem('cna_orders') || '[]');
+  const idx = orders.findIndex(o => (o.id||o.orderId) === id);
+  if (idx !== -1) { Object.assign(orders[idx], fields); localStorage.setItem('cna_orders', JSON.stringify(orders)); }
+  return true;
+}
+
+async function clearAllOrders() {
+  if (!confirm('Delete ALL orders? This cannot be undone.')) return;
+  if (typeof getSB !== 'undefined') { await getSB().from('orders').delete().gte('id', 0); }
+  localStorage.removeItem('cna_orders');
+  await renderOrders(); await updateStats();
+}
+
+function filterOrders(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active-filter'));
+  if (btn) btn.classList.add('active-filter');
+  _renderOrdersDOM();
+}
+
+async function renderOrders() {
+  await loadOrders();
+  _renderOrdersDOM();
+  await updateStats();
+}
+
+function _renderOrdersDOM() {
+  const tbody = document.getElementById('orders-tbody');
+  const empty = document.getElementById('orders-empty');
+  if (!tbody) return;
+  const filtered = currentFilter === 'all' ? _adminOrders : _adminOrders.filter(o => o.status === currentFilter);
+  if (filtered.length === 0) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+  empty.classList.add('hidden');
+  tbody.innerHTML = filtered.map(o => {
+    const id   = o.id || o.orderId;
+    const plan = o.plan_name || o.plan || '—';
+    const type = o.plan_type || o.type || '—';
+    const name = o.customer_name || o.name || '—';
+    const email= o.customer_email || o.email || '—';
+    const date = o.created_at || o.createdAt;
+    const status = o.status || 'Pending';
+    return `<tr>
+      <td><span class="font-mono" style="font-size:0.78rem;color:var(--text-primary)">${escHtml(String(id||'—').slice(0,10))}</span>
+        <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.1rem">${formatDate(date)}</div></td>
+      <td><div style="font-weight:500;color:var(--text-primary);font-size:0.875rem">${escHtml(name)}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted)">${escHtml(email)}</div></td>
+      <td style="font-weight:500;color:var(--text-primary)">${escHtml(plan)}</td>
+      <td><span class="badge ${typeBadge(type)}">${escHtml(type)}</span></td>
+      <td style="font-weight:700;color:var(--text-primary)">₹${Number(o.price||0).toLocaleString('en-IN')}</td>
+      <td><span class="font-mono" style="font-size:0.78rem;background:var(--bg-base);padding:0.2rem 0.5rem;border-radius:4px;border:1px solid var(--border)">${escHtml(o.utr||'—')}</span></td>
+      <td><span class="status-pill ${status.toLowerCase()}">${status}</span></td>
+      <td><div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center">
+        ${status === 'Approved' ? `<span title="${o.email_sent ? 'Credentials emailed' : 'Email not sent'}" style="font-size:0.85rem">${o.email_sent ? '📧' : '📭'}</span>` : ''}
+        ${status !== 'Approved' ? `<button class="btn btn-success btn-sm" onclick="openApprovalModal('${escAttr(String(id))}')">🚀 Approve</button>` : ''}
+        ${status !== 'Rejected' ? `<button class="btn btn-danger btn-sm" onclick="updateOrderStatus('${escAttr(String(id))}','Rejected')">Reject</button>` : ''}
+        ${status !== 'Pending'  ? `<button class="btn btn-ghost btn-sm"  onclick="updateOrderStatus('${escAttr(String(id))}','Pending')">Reset</button>` : ''}
+      </div></td></tr>`;
+  }).join('');
+}
+
+async function updateOrderStatus(id, status) {
+  await saveOrderUpdate(id, { status });
+  await renderOrders();
+  adminToast('Status updated to ' + status, status === 'Approved' ? 'success' : 'info');
+}
+
+async function updateStats() {
+  const orders = _adminOrders;
+  const pending  = orders.filter(o => o.status==='Pending').length;
+  const approved = orders.filter(o => o.status==='Approved').length;
+  const revenue  = orders.filter(o => o.status==='Approved').reduce((s,o)=>s+Number(o.price||0),0);
+  document.getElementById('stat-total').textContent    = orders.length;
+  document.getElementById('stat-pending').textContent  = pending;
+  document.getElementById('stat-approved').textContent = approved;
+  document.getElementById('stat-revenue').textContent  = '₹' + revenue.toLocaleString('en-IN');
+}
+
+/* ═══════════════════════════════════════════════════════
+   APPROVAL MODAL  –  Auto-Provision Pipeline
+═══════════════════════════════════════════════════════ */
+function openApprovalModal(orderId) {
+  const order = _adminOrders.find(o => (o.id||o.orderId) == orderId || String(o.id||o.orderId) === orderId);
+  if (!order) return;
+
+  const email = order.customer_email || order.email || '';
+
+  document.getElementById('approval-order-id').value          = orderId;
+  document.getElementById('approval-plan-label').textContent  = order.plan_name || order.plan || '—';
+  document.getElementById('approval-email-label').textContent = email || '—';
+  document.getElementById('approval-panel-link').value        = order.panel_link || 'https://panel.corenode.in';
+  document.getElementById('approval-username').value          = '';
+  document.getElementById('approval-password').value          = '';
+  document.getElementById('approval-note').value              = '';
+
+  // Reset UI
+  const res = document.getElementById('approval-result');
+  if (res) res.style.display = 'none';
+  const pipe = document.getElementById('approval-pipeline');
+  if (pipe) pipe.style.display = 'none';
+  const btn = document.getElementById('confirm-approve-btn');
+  if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Approve &amp; Send Email'; }
+
+  // Reset auto-gen toggle
+  const tog = document.getElementById('auto-gen-toggle');
+  if (tog) { tog.checked = false; toggleAutoGen(false); }
+
+  // Reset pipeline steps
+  ['pstep-db','pstep-email','pstep-done'].forEach(id => setPipelineStep(id, 'idle'));
+
+  document.getElementById('approval-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeApprovalModal() {
+  document.getElementById('approval-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function toggleAutoGen(on) {
+  const slider = document.getElementById('auto-gen-slider');
+  const knob   = document.getElementById('auto-gen-knob');
+  if (slider) slider.style.background = on ? 'var(--accent)' : 'var(--border)';
+  if (knob)   knob.style.transform    = on ? 'translateX(20px)' : 'translateX(0)';
+
+  const emailLabel = document.getElementById('approval-email-label').textContent;
+  if (on && typeof AutoProvision !== 'undefined') {
+    document.getElementById('approval-username').value = AutoProvision.generateUsername(emailLabel);
+    document.getElementById('approval-password').value = AutoProvision.generatePassword();
+  }
+}
+
+function setPipelineStep(id, state) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const icons = { idle:'⏳', running:'🔄', done:'✅', error:'❌' };
+  const icon  = el.querySelector('.pstep-icon');
+  if (icon) icon.textContent = icons[state] || '⏳';
+  el.style.opacity  = state === 'idle' ? '0.4' : '1';
+}
+
+async function confirmApproval() {
+  const orderId   = document.getElementById('approval-order-id').value;
+  const panelLink = (document.getElementById('approval-panel-link').value || '').trim();
+  const username  = (document.getElementById('approval-username').value   || '').trim();
+  const password  = (document.getElementById('approval-password').value   || '').trim();
+  const note      = (document.getElementById('approval-note').value       || '').trim();
+
+  if (!panelLink || !username || !password) {
+    adminToast('Please fill in Panel URL, Username and Password.', 'error');
+    return;
+  }
+
+  const btn  = document.getElementById('confirm-approve-btn');
+  const res  = document.getElementById('approval-result');
+  const pipe = document.getElementById('approval-pipeline');
+
+  // Disable button & show pipeline
+  if (btn)  { btn.disabled = true; btn.innerHTML = '⏳ Processing…'; }
+  if (pipe) pipe.style.display = '';
+  if (res)  res.style.display  = 'none';
+
+  setPipelineStep('pstep-db',    'running');
+  setPipelineStep('pstep-email', 'idle');
+  setPipelineStep('pstep-done',  'idle');
+
+  try {
+    // Small delay so user sees the steps animate
+    await new Promise(r => setTimeout(r, 400));
+
+    setPipelineStep('pstep-db', 'running');
+    const result = await AutoProvision.approve(orderId, { panelLink, username, password, adminNote: note });
+    setPipelineStep('pstep-db', 'done');
+
+    await new Promise(r => setTimeout(r, 300));
+    setPipelineStep('pstep-email', result.email_sent ? 'done' : 'error');
+
+    await new Promise(r => setTimeout(r, 300));
+    setPipelineStep('pstep-done', 'done');
+
+    // Show result box
+    if (res) {
+      const emailMsg = result.email_sent
+        ? `<span style="color:#4ade80">📧 Email sent to customer</span>`
+        : `<span style="color:#fbbf24">⚠️ Email not sent${result.email_error ? ': ' + result.email_error : ' (configure Resend API key)'}</span>`;
+      res.style.display = '';
+      res.style.background = 'rgba(0,255,156,0.06)';
+      res.style.border = '1px solid rgba(0,255,156,0.2)';
+      res.style.color = 'var(--text-primary)';
+      res.innerHTML = `<div style="font-weight:700;margin-bottom:0.4rem;color:#4ade80">✅ Order Approved!</div>${emailMsg}`;
+    }
+
+    await renderOrders();
+    adminToast('Order approved! Server provisioned.', 'success');
+
+    setTimeout(() => closeApprovalModal(), 2000);
+
+  } catch (err) {
+    setPipelineStep('pstep-db',    'error');
+    setPipelineStep('pstep-email', 'error');
+    setPipelineStep('pstep-done',  'error');
+
+    if (res) {
+      res.style.display = '';
+      res.style.background = 'rgba(239,68,68,0.08)';
+      res.style.border = '1px solid rgba(239,68,68,0.25)';
+      res.style.color = '#f87171';
+      res.innerHTML = `<strong>Error:</strong> ${err.message}`;
+    }
+
+    if (btn) { btn.disabled = false; btn.innerHTML = 'Retry'; }
+    adminToast('Approval failed: ' + err.message, 'error');
+  }
+}
+
+document.getElementById('approval-modal-overlay')?.addEventListener('click', e => {
+  if (e.target.id === 'approval-modal-overlay') closeApprovalModal();
+});
+
+/* ═══════════════════════════════════════════════════════
+   PLAN MANAGER  (Supabase-aware)
+═══════════════════════════════════════════════════════ */
+async function renderPlans() {
+  const tbody = document.getElementById('plans-tbody');
+  if (!tbody) return;
+  const plans = PlanManager.getAllPlans();
+  tbody.innerHTML = plans.map(p => {
+    const stock = p.stock ?? 99;
+    const stockCls = stock===0 ? 'stock-out' : stock<=3 ? 'stock-low' : 'stock-ok';
+    const nodeLabel = p.node==='intel' ? '💠 Xeon' : '🔥 EPYC';
+    const nodeCls   = p.node==='intel' ? 'badge-warning' : 'badge-accent';
+    const specStr   = p.ram ? `🧠 ${p.ram} · ⚙️ ${p.vcores} vCores` : `⚙️ ${p.vcores||'—'} vCores`;
+    const rowId     = p.id || p.plan_id;
+    return `<tr class="plan-row" id="plan-row-${rowId}">
+      <td><div style="font-weight:600;color:var(--text-primary);font-size:0.875rem">${escHtml(p.name)}</div>
+        <span class="badge ${nodeCls}" style="font-size:0.65rem;margin-top:2px">${nodeLabel}</span></td>
+      <td><span class="badge badge-accent" style="font-size:0.7rem">${p.planType||p.plan_type||'MC'}</span></td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${escHtml(specStr)}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary)">${escHtml(p.nvme||p.bandwidth||'—')}</td>
+      <td><input class="plan-edit-input" id="price-${rowId}" type="number" value="${p.price}" style="width:80px"
+        onchange="savePlanField('${escAttr(String(rowId))}','price',this.value,'number')" /></td>
+      <td><div style="display:flex;align-items:center;gap:0.5rem;">
+        <input class="plan-edit-input" id="stock-${rowId}" type="number" value="${stock}" style="width:60px"
+          onchange="savePlanField('${escAttr(String(rowId))}','stock',this.value,'number')" />
+        <span class="stock-badge ${stockCls}">${stock===0?'✕ OUT':stock<=3?'⚠ LOW':'✓'}</span></div></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletePlan('${escAttr(String(rowId))}')">Delete</button></td></tr>`;
+  }).join('');
+}
+
+async function savePlanField(id, field, value, type) {
+  const parsed = type==='number' ? Number(value) : value;
+  await PlanManager.updatePlan(id, { [field]: parsed });
+  await renderPlans();
+  showPlanMsg('Plan updated!', 'success');
+}
+
+async function deletePlan(id) {
+  if (!confirm('Delete this plan? It will be hidden from the frontend.')) return;
+  await PlanManager.deletePlan(id);
+  await renderPlans();
+  showPlanMsg('Plan deleted.', 'info');
+}
+
+function openAddPlanModal() {
+  ['np-id','np-name','np-price','np-ram','np-vcores','np-nvme','np-stock'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('add-plan-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAddPlanModal() { document.getElementById('add-plan-modal-overlay').classList.remove('open'); document.body.style.overflow=''; }
+
+async function saveNewPlan() {
+  const id     = (document.getElementById('np-id')?.value     || '').trim();
+  const name   = (document.getElementById('np-name')?.value   || '').trim();
+  const price  = Number(document.getElementById('np-price')?.value  || 0);
+  const ram    = (document.getElementById('np-ram')?.value    || '').trim();
+  const vcores = Number(document.getElementById('np-vcores')?.value || 0);
+  const nvme   = (document.getElementById('np-nvme')?.value   || '').trim();
+  const stock  = Number(document.getElementById('np-stock')?.value  || 10);
+  const type   = document.getElementById('np-type')?.value || 'Minecraft Hosting';
+  const node   = document.getElementById('np-node')?.value || 'amd';
+  if (!id || !name || !price) { adminToast('Plan ID, Name and Price are required.','error'); return; }
+  await PlanManager.addPlan({ id, name, price, ram, vcores, nvme, stock, tag:null, planType:type, node });
+  closeAddPlanModal();
+  await renderPlans();
+  showPlanMsg('New plan added!', 'success');
+}
+
+document.getElementById('add-plan-modal-overlay')?.addEventListener('click', e => { if(e.target.id==='add-plan-modal-overlay') closeAddPlanModal(); });
+
+function showPlanMsg(msg, type) {
+  const el = document.getElementById('plan-msg'); if(!el) return;
+  const cls = {success:'alert-success',error:'alert-danger',info:'alert-info'};
+  el.className=`alert ${cls[type]||'alert-info'}`; el.innerHTML=`<span>${msg}</span>`; el.classList.remove('hidden');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.add('hidden'),3500);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ADMIN TOAST
+═══════════════════════════════════════════════════════ */
+function adminToast(message, type='info') {
+  let toast = document.getElementById('admin-toast');
+  if (!toast) { toast=document.createElement('div'); toast.id='admin-toast'; toast.className='toast'; document.body.appendChild(toast); }
+  const icons={success:'✓',error:'✕',info:'ℹ'};
+  toast.className=`toast ${type}`; toast.innerHTML=`<span>${icons[type]||'ℹ'}</span><span>${message}</span>`;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
+  clearTimeout(toast._t); toast._t=setTimeout(()=>toast.classList.remove('show'),3500);
+}
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════ */
+function escHtml(str) { const d=document.createElement('div'); d.appendChild(document.createTextNode(str||'')); return d.innerHTML; }
+function escAttr(str) { return (str||'').replace(/'/g,"&#39;").replace(/"/g,"&quot;"); }
+function formatDate(iso) { if(!iso)return''; try{ return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){return iso;} }
+function typeBadge(type) {
+  if (!type) return 'badge-accent'; const t=type.toLowerCase();
+  if (t.includes('minecraft')) return 'badge-success';
+  if (t.includes('vps'))       return 'badge-accent';
+  if (t.includes('domain'))    return 'badge-warning';
+  return 'badge-accent';
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  await renderOrders();
+  await updateStats();
+  // Subscribe to real-time changes
+  if (typeof getSB !== 'undefined') {
+    try {
+      getSB().channel('admin-orders').on('postgres_changes',
+        { event:'*', schema:'public', table:'orders' },
+        async () => { await renderOrders(); await updateStats(); }
+      ).subscribe();
+      getSB().channel('admin-tickets').on('postgres_changes',
+        { event:'*', schema:'public', table:'tickets' },
+        async () => { await SupportAdmin.renderTickets(); await SupportAdmin.updateTicketStats(); }
+      ).subscribe();
+    } catch(e) { console.warn('Realtime setup failed:', e); }
+  }
+});
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Guard: only allow admin access
+    const ok = await AdminAuth.guard();
+    if (!ok) return;
+
+    // Init sub-systems
+    await PlanManager.init();
+    await PaymentSettings.initAdminSettingsUI();
+    await SupportAdmin.init();
+
+    // Mobile sidebar toggle with backdrop
+    const toggleBtn = document.getElementById('admin-sidebar-toggle');
+    const sidebar   = document.getElementById('admin-sidebar');
+    const backdrop  = document.getElementById('admin-sidebar-backdrop');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      backdrop.classList.add('visible');
+      document.body.classList.add('sidebar-open');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('visible');
+      document.body.classList.remove('sidebar-open');
+    }
+
+    toggleBtn?.addEventListener('click', () => {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    });
+    backdrop?.addEventListener('click', closeSidebar);
+
+    // Close sidebar when a nav item is clicked on mobile
+    document.querySelectorAll('.admin-nav-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (window.innerWidth < 900) closeSidebar();
+      });
+    });
+  });
+</script>
+</body>
+</html>

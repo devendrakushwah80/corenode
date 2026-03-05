@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – CoreNode</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    /* Dashboard layout */
+    .dash-page { min-height: 100vh; background: var(--bg-base); }
+    .dash-topbar { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+    .dash-topbar-logo { display: flex; align-items: center; gap: 0.6rem; font-size: 1rem; font-weight: 800; font-family: 'Orbitron', sans-serif; color: var(--text-primary); text-decoration: none; }
+    .dash-topbar-logo .logo-icon { background: linear-gradient(135deg, var(--accent), #00c97a); color: #000; font-weight: 900; font-size: 0.75rem; width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px rgba(0,255,156,.3); }
+    .dash-topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .dash-user-chip { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-base); border: 1px solid var(--border); border-radius: 20px; padding: 0.35rem 0.85rem; font-size: 0.8rem; color: var(--text-secondary); }
+    .dash-user-chip .chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); flex-shrink: 0; }
+
+    .dash-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 60px); }
+    .dash-sidebar { background: var(--bg-card); border-right: 1px solid var(--border); padding: 1.25rem 0; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
+    .dash-nav-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 1.25rem; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; border: none; background: none; width: 100%; text-align: left; transition: all .2s; border-left: 2px solid transparent; }
+    .dash-nav-item:hover { color: var(--text-primary); background: rgba(255,255,255,.03); }
+    .dash-nav-item.active { color: var(--accent); background: rgba(0,255,156,.06); border-left-color: var(--accent); }
+    .dash-nav-section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); padding: 1rem 1.25rem 0.4rem; }
+
+    .dash-main { padding: 2rem; overflow-x: hidden; }
+    .dash-section { display: none; }
+    .dash-section.active { display: block; }
+
+    .dash-section-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .dash-section-sub { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+
+    /* Order cards */
+    .order-list { display: flex; flex-direction: column; gap: 1rem; }
+    .d-order-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; transition: border-color .2s; }
+    .d-order-card:hover { border-color: var(--border-light, #243047); }
+    .d-order-card.status-approved { border-color: rgba(0,255,156,.25); }
+    .d-order-card.status-pending  { border-color: rgba(217,119,6,.2); }
+    .d-order-card.status-rejected { border-color: rgba(220,38,38,.2); }
+    .d-order-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .d-order-name { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+    .d-order-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .d-order-price { font-size: 1rem; font-weight: 800; color: var(--accent); text-shadow: 0 0 16px rgba(0,255,156,.4); }
+    .d-order-details { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+    .d-detail { background: var(--bg-base); border-radius: 6px; padding: 0.45rem 0.65rem; }
+    .d-detail-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.15rem; }
+    .d-detail-val { font-size: 0.8rem; font-family: monospace; color: var(--text-primary); word-break: break-all; }
+
+    /* Credentials card */
+    .creds-card { background: linear-gradient(135deg, rgba(0,255,156,.05), rgba(0,255,156,.02)); border: 1px solid rgba(0,255,156,.2); border-radius: var(--radius); padding: 1rem; margin-top: 0.75rem; }
+    .creds-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.6rem; margin-top: 0.6rem; }
+    .cred-item { background: var(--bg-base); border-radius: 6px; padding: 0.5rem 0.65rem; }
+    .cred-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.2rem; }
+    .cred-value { font-size: 0.8rem; font-family: monospace; color: var(--text-primary); word-break: break-all; }
+    .cred-pw { filter: blur(4px); cursor: pointer; transition: filter .2s; }
+    .cred-pw.revealed { filter: none; }
+
+    /* Ticket cards */
+    .ticket-list { display: flex; flex-direction: column; gap: 0.85rem; }
+    .ticket-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
+    .ticket-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; }
+    .ticket-subject { font-weight: 600; font-size: 0.9rem; color: var(--text-primary); }
+    .ticket-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .ticket-body { font-size: 0.83rem; color: var(--text-secondary); margin-top: 0.6rem; line-height: 1.6; }
+    .ticket-reply { background: rgba(0,255,156,.05); border-left: 2px solid var(--accent); padding: 0.6rem 0.85rem; border-radius: 0 6px 6px 0; margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-secondary); }
+    .ticket-reply-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 0.3rem; }
+
+    /* New ticket form */
+    .new-ticket-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .new-ticket-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+    .new-ticket-form { margin-top: 1.25rem; display: none; }
+    .new-ticket-form.open { display: block; }
+
+    /* Account settings */
+    .settings-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 480px; }
+    .settings-field { margin-bottom: 1rem; }
+    .settings-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.35rem; }
+    .settings-value { font-size: 0.9rem; color: var(--text-primary); padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+
+    /* Skeleton */
+    .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, rgba(255,255,255,.04) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Quick links */
+    .quick-links { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.75rem; }
+    .quick-link { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; text-decoration: none; color: var(--text-secondary); font-size: 0.82rem; font-weight: 500; transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .quick-link:hover { border-color: rgba(0,255,156,.2); color: var(--text-primary); transform: translateY(-2px); }
+    .quick-link-icon { font-size: 1.5rem; }
+
+    /* Mobile */
+    .dash-mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border); z-index: 200; padding: 0.5rem; }
+    .dash-mobile-nav-inner { display: flex; justify-content: space-around; }
+    .dash-mobile-btn { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; font-size: 0.65rem; color: var(--text-muted); padding: 0.4rem 0.75rem; border: none; background: none; cursor: pointer; border-radius: 8px; transition: all .2s; }
+    .dash-mobile-btn.active { color: var(--accent); background: rgba(0,255,156,.06); }
+    .dash-mobile-btn svg { width: 18px; height: 18px; }
+
+    @media (max-width: 768px) {
+      .dash-layout { grid-template-columns: 1fr; }
+      .dash-sidebar { display: none; }
+      .dash-main { padding: 1.25rem 1rem 5rem; }
+      .dash-mobile-nav { display: block; }
+      .d-order-details { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="dash-page">
+
+  <!-- Top bar -->
+  <header class="dash-topbar">
+    <div style="display:flex;align-items:center;gap:0.6rem">
+      <button id="dash-sidebar-toggle" aria-label="Toggle menu" style="display:none;align-items:center;justify-content:center;width:34px;height:34px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-secondary);cursor:pointer;flex-shrink:0">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+      </button>
+    <a href="index.html" class="dash-topbar-logo">
+      <div class="logo-icon">CN</div>
+      CoreNode
+    </a>
+    </div>
+    <div class="dash-topbar-right">
+      <div class="dash-user-chip">
+        <span class="chip-dot"></span>
+        <span id="dash-user-email" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Loading…</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="dash-logout-btn">Logout</button>
+    </div>
+  </header>
+
+  <div class="dash-layout">
+    <!-- Sidebar -->
+    <aside class="dash-sidebar" id="dash-sidebar">
+      <div class="dash-nav-section-label">Main</div>
+      <button class="dash-nav-item active" data-tab="overview" onclick="switchTab('overview',this)">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+        Overview
+      </button>
+      <button class="dash-nav-item" data-tab="orders" onclick="switchTab('orders',this)">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+        My Orders
+        <span id="orders-count-badge" class="cart-count hidden" style="margin-left:auto">0</span>
+      </button>
+      <button class="dash-nav-item" data-tab="tickets" onclick="switchTab('tickets',this)">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+        Support Tickets
+      </button>
+      <div class="dash-nav-section-label">Account</div>
+      <button class="dash-nav-item" data-tab="account" onclick="switchTab('account',this)">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        Account Settings
+      </button>
+      <div style="padding: 1rem 1.25rem; margin-top: auto; border-top: 1px solid var(--border);">
+        <a href="minecraft.html" class="btn btn-primary btn-sm btn-full" style="justify-content:center;margin-bottom:0.5rem">
+          + New Server
+        </a>
+        <a href="index.html" class="btn btn-ghost btn-sm btn-full" style="justify-content:center">
+          ← Back to Site
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="dash-main">
+
+      <!-- OVERVIEW -->
+      <section class="dash-section active" id="tab-overview">
+        <div class="dash-section-title">Dashboard</div>
+        <div class="dash-section-sub">Welcome back! Here's a quick overview of your account.</div>
+
+        <div class="quick-links">
+          <a href="minecraft.html" class="quick-link"><span class="quick-link-icon">⛏️</span>Minecraft</a>
+          <a href="vps.html"       class="quick-link"><span class="quick-link-icon">🖥️</span>VPS</a>
+          <a href="domains.html"   class="quick-link"><span class="quick-link-icon">🌐</span>Domains</a>
+          <a href="orders.html"    class="quick-link"><span class="quick-link-icon">📋</span>Orders</a>
+        </div>
+
+        <div class="dash-stats" style="margin-bottom:1.5rem">
+          <div class="dash-stat"><div class="dash-stat-label">Total Orders</div><div class="dash-stat-value" id="ov-total">—</div></div>
+          <div class="dash-stat"><div class="dash-stat-label">Active</div><div class="dash-stat-value" id="ov-active" style="color:var(--accent)">—</div></div>
+          <div class="dash-stat"><div class="dash-stat-label">Pending</div><div class="dash-stat-value" id="ov-pending" style="color:var(--warning)">—</div></div>
+          <div class="dash-stat"><div class="dash-stat-label">Tickets</div><div class="dash-stat-value" id="ov-tickets" style="color:#a78bfa">—</div></div>
+        </div>
+
+        <div class="dash-section-title" style="font-size:0.95rem;margin-bottom:1rem">Recent Orders</div>
+        <div id="overview-recent-orders"><div class="skeleton" style="height:80px;margin-bottom:0.75rem"></div><div class="skeleton" style="height:80px"></div></div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="dash-section" id="tab-orders">
+        <div class="dash-section-title">My Orders</div>
+        <div class="dash-section-sub">All your hosting orders and their current status.</div>
+        <div id="orders-list" class="order-list"><div class="skeleton" style="height:100px;margin-bottom:0.75rem"></div><div class="skeleton" style="height:100px"></div></div>
+      </section>
+
+      <!-- TICKETS -->
+      <section class="dash-section" id="tab-tickets">
+        <div class="dash-section-title">Support Tickets</div>
+        <div class="dash-section-sub">Get help from our team or check your open tickets.</div>
+
+        <!-- New ticket -->
+        <div class="new-ticket-panel">
+          <div class="new-ticket-toggle" onclick="toggleNewTicket()">
+            <div>
+              <div style="font-weight:700;font-size:0.9rem">Submit New Ticket</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.1rem">Describe your issue and we'll respond within 24h</div>
+            </div>
+            <svg id="ticket-toggle-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;transition:transform .2s"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+          </div>
+          <div class="new-ticket-form" id="new-ticket-form">
+            <div id="ticket-success" style="display:none;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);color:#4ade80;border-radius:var(--radius);padding:0.7rem 1rem;font-size:0.83rem;margin-bottom:1rem"></div>
+            <div id="ticket-error" style="display:none;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);color:#f87171;border-radius:var(--radius);padding:0.7rem 1rem;font-size:0.83rem;margin-bottom:1rem"></div>
+            <div class="form-group">
+              <label class="form-label">Subject</label>
+              <input class="form-input" id="new-ticket-subject" placeholder="Brief description of your issue" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea class="form-input" id="new-ticket-message" rows="4" placeholder="Describe your issue in detail…" style="resize:vertical"></textarea>
+            </div>
+            <button class="btn btn-primary" id="submit-ticket-btn" onclick="submitTicket()">Submit Ticket</button>
+          </div>
+        </div>
+
+        <div id="tickets-list" class="ticket-list"><div class="skeleton" style="height:80px"></div></div>
+      </section>
+
+      <!-- ACCOUNT -->
+      <section class="dash-section" id="tab-account">
+        <div class="dash-section-title">Account Settings</div>
+        <div class="dash-section-sub">Manage your account details.</div>
+
+        <div class="settings-panel">
+          <div class="settings-field">
+            <div class="settings-label">Email Address</div>
+            <div class="settings-value" id="account-email">—</div>
+          </div>
+          <div class="settings-field">
+            <div class="settings-label">User ID</div>
+            <div class="settings-value" id="account-uid" style="font-family:monospace;font-size:0.78rem;word-break:break-all">—</div>
+          </div>
+          <div class="settings-field" style="margin-bottom:0">
+            <div class="settings-label">Member Since</div>
+            <div class="settings-value" id="account-created">—</div>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem">
+          <div style="font-size:0.85rem;font-weight:700;margin-bottom:0.75rem">Change Password</div>
+          <div style="max-width:480px">
+            <div id="pw-change-msg" style="display:none;margin-bottom:0.75rem;padding:0.7rem 1rem;border-radius:var(--radius);font-size:0.83rem"></div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input class="form-input" id="new-password" type="password" placeholder="Min 6 characters" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input class="form-input" id="confirm-password" type="password" placeholder="Repeat new password" />
+            </div>
+            <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+          </div>
+        </div>
+
+        <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border)">
+          <button class="btn btn-danger" onclick="AuthManager.signOut()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+            Sign Out
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="dash-mobile-nav">
+    <div class="dash-mobile-nav-inner">
+      <button class="dash-mobile-btn active" onclick="switchTab('overview',this)" data-tab="overview">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+        Home
+      </button>
+      <button class="dash-mobile-btn" onclick="switchTab('orders',this)" data-tab="orders">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+        Orders
+      </button>
+      <button class="dash-mobile-btn" onclick="switchTab('tickets',this)" data-tab="tickets">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+        Support
+      </button>
+      <button class="dash-mobile-btn" onclick="switchTab('account',this)" data-tab="account">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        Account
+      </button>
+    </div>
+  </nav>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase.js"></script>
+<script src="assets/js/support.js"></script>
+<script>
+  /* ─── State ─── */
+  let _orders  = [];
+  let _tickets = [];
+
+  function esc(s){ const d=document.createElement('div'); d.appendChild(document.createTextNode(s||'')); return d.innerHTML; }
+  function fmt(iso){ if(!iso)return ''; try{ return new Date(iso).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){return iso;} }
+
+  /* ─── Tab switching ─── */
+  function switchTab(name, btn) {
+    document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+    document.querySelector('#tab-' + name).classList.add('active');
+    document.querySelectorAll('.dash-nav-item, .dash-mobile-btn').forEach(b => {
+      if (b.dataset.tab) b.classList.toggle('active', b.dataset.tab === name);
+    });
+  }
+
+  /* ─── New ticket toggle ─── */
+  function toggleNewTicket() {
+    const form = document.getElementById('new-ticket-form');
+    const icon = document.getElementById('ticket-toggle-icon');
+    const open = form.classList.toggle('open');
+    icon.style.transform = open ? 'rotate(45deg)' : '';
+  }
+
+  /* ─── Load orders ─── */
+  async function loadOrders() {
+    const userId = AuthManager.getUserId();
+    const { data } = await DB.getMyOrders(userId);
+    _orders = data || [];
+
+    // Update stats
+    document.getElementById('ov-total').textContent   = _orders.length;
+    document.getElementById('ov-active').textContent  = _orders.filter(o=>o.status==='Approved').length;
+    document.getElementById('ov-pending').textContent = _orders.filter(o=>o.status==='Pending').length;
+    const badge = document.getElementById('orders-count-badge');
+    badge.textContent = _orders.length;
+    badge.classList.toggle('hidden', _orders.length === 0);
+
+    renderOrders(_orders, document.getElementById('orders-list'));
+    renderOrders(_orders.slice(0,3), document.getElementById('overview-recent-orders'));
+  }
+
+  function renderOrders(orders, container) {
+    if (!container) return;
+    if (!orders || orders.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2.5rem;color:var(--text-muted);font-size:0.88rem">No orders found. <a href="minecraft.html" style="color:var(--accent)">Browse plans →</a></div>';
+      return;
+    }
+    container.innerHTML = orders.map(o => {
+      const statusCls = {Approved:'status-approved',Pending:'status-pending',Rejected:'status-rejected'}[o.status]||'';
+      const statusDot = {Approved:'#00ff9c',Pending:'#d97706',Rejected:'#dc2626'}[o.status]||'#888';
+      const label     = {Approved:'Approved',Pending:'Pending Verification',Rejected:'Rejected'}[o.status]||o.status;
+
+      let creds = '';
+      if (o.status==='Approved' && o.panel_link) {
+        creds = `<div class="creds-card">
+          <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem">
+            <span>✅</span><span style="font-weight:700;font-size:0.85rem;color:#4ade80">Server Activated</span>
+          </div>
+          <div class="creds-grid">
+            <div class="cred-item"><div class="cred-label">Panel Link</div><div class="cred-value"><a href="${esc(o.panel_link)}" target="_blank" style="color:var(--accent)">${esc(o.panel_link)}</a></div></div>
+            <div class="cred-item"><div class="cred-label">Username</div><div class="cred-value">${esc(o.panel_username||'—')}</div></div>
+            <div class="cred-item"><div class="cred-label">Password</div><div class="cred-value cred-pw" onclick="this.classList.add('revealed')">${esc(o.panel_password||'—')}<div style="font-size:0.68rem;color:var(--text-muted);margin-top:0.2rem;font-family:sans-serif">Click to reveal</div></div></div>
+          </div>
+        </div>`;
+      }
+
+      const icon = o.plan_type?.toLowerCase().includes('minecraft')?'⛏️':o.plan_type?.toLowerCase().includes('vps')?'🖥️':o.plan_type?.toLowerCase().includes('domain')?'🌐':'📦';
+      return `<div class="d-order-card ${statusCls}">
+        <div class="d-order-header">
+          <div>
+            <div class="d-order-name">${icon} ${esc(o.plan_name)}</div>
+            <div class="d-order-meta">${esc(o.plan_type||'')} · ${fmt(o.created_at)}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem">
+            <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;font-weight:600;color:var(--text-secondary)">
+              <span style="width:7px;height:7px;border-radius:50%;background:${statusDot};display:inline-block;box-shadow:0 0 6px ${statusDot}"></span>${label}
+            </div>
+            <div class="d-order-price">₹${Number(o.price||0).toLocaleString('en-IN')}</div>
+          </div>
+        </div>
+        <div class="d-order-details">
+          <div class="d-detail"><div class="d-detail-label">Order ID</div><div class="d-detail-val">${esc(o.id?.toString().slice(0,8)||'—')}</div></div>
+          <div class="d-detail"><div class="d-detail-label">UTR</div><div class="d-detail-val">${esc(o.utr||'—')}</div></div>
+        </div>
+        ${creds}
+      </div>`;
+    }).join('');
+  }
+
+  /* ─── Load tickets ─── */
+  async function loadTickets() {
+    const userId = AuthManager.getUserId();
+    const { data } = await DB.getMyTickets(userId);
+    _tickets = data || [];
+    document.getElementById('ov-tickets').textContent = _tickets.length;
+    renderTickets();
+  }
+
+  function renderTickets() {
+    const container = document.getElementById('tickets-list');
+    if (_tickets.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:2.5rem;color:var(--text-muted);font-size:0.88rem">No tickets yet. Submit one above if you need help.</div>';
+      return;
+    }
+    const colors = { Open:'#d97706', Answered:'#00ff9c', Closed:'#64748b' };
+    container.innerHTML = _tickets.map(t => `
+      <div class="ticket-card">
+        <div class="ticket-header">
+          <div>
+            <div class="ticket-subject">${esc(t.subject||'(No subject)')}</div>
+            <div class="ticket-meta">${fmt(t.created_at)}</div>
+          </div>
+          <span style="font-size:0.75rem;font-weight:700;color:${colors[t.status]||'#d97706'};white-space:nowrap;background:rgba(0,0,0,.2);padding:0.2rem 0.6rem;border-radius:20px;border:1px solid currentColor">${esc(t.status||'Open')}</span>
+        </div>
+        <div class="ticket-body">${esc(t.message)}</div>
+        ${t.admin_reply ? `<div class="ticket-reply"><div class="ticket-reply-label">✅ Support Reply</div>${esc(t.admin_reply)}</div>` : ''}
+      </div>`).join('');
+  }
+
+  /* ─── Submit ticket ─── */
+  async function submitTicket() {
+    const subject = document.getElementById('new-ticket-subject').value.trim();
+    const message = document.getElementById('new-ticket-message').value.trim();
+    const errEl   = document.getElementById('ticket-error');
+    const succEl  = document.getElementById('ticket-success');
+    const btn     = document.getElementById('submit-ticket-btn');
+
+    errEl.style.display = 'none'; succEl.style.display = 'none';
+    if (!subject || !message) { errEl.textContent='Please fill in subject and message.'; errEl.style.display='block'; return; }
+
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    const { error } = await DB.insertTicket({
+      user_id: AuthManager.getUserId(),
+      customer_email: AuthManager.getUserEmail(),
+      subject, message,
+      status: 'Open',
+      admin_reply: null,
+      order_ref: null
+    });
+
+    if (error) { errEl.textContent = error.message; errEl.style.display='block'; btn.disabled=false; btn.textContent='Submit Ticket'; return; }
+
+    succEl.textContent = "Ticket submitted! We'll get back to you soon.";
+    succEl.style.display='block';
+    document.getElementById('new-ticket-subject').value = '';
+    document.getElementById('new-ticket-message').value = '';
+    btn.disabled = false; btn.textContent = 'Submit Ticket';
+    await loadTickets();
+  }
+
+  /* ─── Change password ─── */
+  async function changePassword() {
+    const np  = document.getElementById('new-password').value;
+    const cp  = document.getElementById('confirm-password').value;
+    const msg = document.getElementById('pw-change-msg');
+
+    const show = (text, ok) => {
+      msg.textContent = text;
+      msg.style.display = 'block';
+      msg.style.background = ok ? 'rgba(22,163,74,.1)' : 'rgba(220,38,38,.1)';
+      msg.style.border = ok ? '1px solid rgba(22,163,74,.3)' : '1px solid rgba(220,38,38,.3)';
+      msg.style.color = ok ? '#4ade80' : '#f87171';
+      msg.style.borderRadius = 'var(--radius)';
+      msg.style.padding = '0.7rem 1rem';
+    };
+
+    if (!np || !cp) { show('Please fill in both fields.'); return; }
+    if (np !== cp)  { show('Passwords do not match.'); return; }
+    if (np.length<6){ show('Password must be at least 6 characters.'); return; }
+
+    const { error } = await getSB().auth.updateUser({ password: np });
+    if (error) { show(error.message); return; }
+    show('Password updated successfully!', true);
+    document.getElementById('new-password').value = '';
+    document.getElementById('confirm-password').value = '';
+  }
+
+  /* ─── Init ─── */
+  document.addEventListener('DOMContentLoaded', async () => {
+    const session = await AuthManager.init();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    // Mobile sidebar toggle
+    const toggleBtn = document.getElementById('dash-sidebar-toggle');
+    const sidebar   = document.getElementById('dash-sidebar');
+    if (toggleBtn && sidebar) {
+      // Show button on mobile
+      if (window.innerWidth <= 768) toggleBtn.style.display = 'flex';
+      window.addEventListener('resize', () => { toggleBtn.style.display = window.innerWidth <= 768 ? 'flex' : 'none'; });
+
+      // Inject backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sidebar-backdrop';
+      document.body.appendChild(backdrop);
+
+      toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        backdrop.classList.toggle('visible');
+      });
+      backdrop.addEventListener('click', () => {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('visible');
+      });
+    }
+
+    const user = AuthManager.getUser();
+    document.getElementById('dash-user-email').textContent = user.email || '';
+    document.getElementById('account-email').textContent   = user.email || '';
+    document.getElementById('account-uid').textContent     = user.id   || '';
+    document.getElementById('account-created').textContent = fmt(user.created_at);
+
+    document.getElementById('dash-logout-btn').addEventListener('click', () => AuthManager.signOut());
+
+    await Promise.all([loadOrders(), loadTickets()]);
+
+    // Real-time order updates
+    getSB().channel('orders-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${user.id}` }, () => { loadOrders(); }).subscribe();
+    getSB().channel('tickets-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'tickets', filter: `user_id=eq.${user.id}` }, () => { loadTickets(); }).subscribe();
+  });
+</script>
+</body>
+</html>

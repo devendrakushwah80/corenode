@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoreNode – Enterprise Gaming Hosting</title>
+  <meta name="description" content="Enterprise Minecraft hosting, VPS, and domain services built for performance in India." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    /* Homepage-specific extras */
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      margin-bottom: 1.75rem;
+    }
+    .live-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 0 rgba(0,255,156,.5);
+      animation: pingPulse 2s infinite;
+    }
+    @keyframes pingPulse {
+      0%   { box-shadow: 0 0 0 0 rgba(0,255,156,.5); }
+      70%  { box-shadow: 0 0 0 8px rgba(0,255,156,0); }
+      100% { box-shadow: 0 0 0 0 rgba(0,255,156,0); }
+    }
+
+    /* Service cards upgrade */
+    .service-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      display: flex; flex-direction: column; gap: 1.1rem;
+      transition: border-color .3s, box-shadow .3s, transform .3s;
+      position: relative; overflow: hidden;
+    }
+    .service-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,255,156,.1), transparent);
+      transition: background .3s;
+    }
+    .service-card:hover {
+      border-color: rgba(0,255,156,.22);
+      box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(0,255,156,.06);
+      transform: translateY(-3px);
+    }
+    .service-card:hover::before {
+      background: linear-gradient(90deg, transparent, rgba(0,255,156,.25), transparent);
+    }
+    .service-icon {
+      width: 50px; height: 50px;
+      background: linear-gradient(135deg, rgba(0,255,156,.1), rgba(0,255,156,.04));
+      border: 1px solid rgba(0,255,156,.18);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      transition: box-shadow .3s;
+    }
+    .service-card:hover .service-icon { box-shadow: 0 0 20px rgba(0,255,156,.2); }
+    .service-card h3 { font-size: 1.05rem; margin-bottom: .3rem; }
+    .service-card p { font-size: .855rem; color: var(--text-secondary); line-height: 1.65; }
+    .service-features { display: flex; flex-direction: column; gap: .38rem; }
+    .service-feature {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .8rem; color: var(--text-secondary);
+    }
+    .service-feature .sf-check { color: var(--accent); font-weight: 700; }
+
+    /* Reseller card special */
+    .service-card.reseller-card { border-color: rgba(124,58,237,.25); }
+    .service-card.reseller-card .service-icon {
+      background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(124,58,237,.05));
+      border-color: rgba(124,58,237,.25);
+    }
+    .service-card.reseller-card:hover {
+      border-color: rgba(124,58,237,.4);
+      box-shadow: 0 12px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(124,58,237,.08);
+    }
+    .service-card.reseller-card .sf-check { color: #a78bfa; }
+    .service-card.reseller-card .btn-secondary:hover {
+      border-color: var(--purple-light); color: var(--purple-light);
+      background: rgba(124,58,237,.08);
+    }
+
+    /* Trusted by bar */
+    .trust-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 2.5rem; flex-wrap: wrap;
+      padding: 1.75rem 0;
+    }
+    .trust-item {
+      display: flex; align-items: center; gap: .6rem;
+      font-size: .8rem; color: var(--text-muted); font-family: var(--font);
+    }
+    .trust-item svg { color: var(--accent); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">CN</div>
+        CoreNode
+      </a>
+      <ul class="navbar-links" id="nav-links-desktop">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="minecraft.html">Minecraft</a></li>
+        <li><a href="vps.html">VPS</a></li>
+        <li><a href="domains.html">Domains</a></li>
+        <li><a href="reseller.html">Reseller</a></li>
+        <li data-auth-show="logged-in" style="display:none"><a href="orders.html" data-auth-show="logged-in" style="display:none">My Orders</a></li>
+      </ul>
+      <div class="navbar-right" id="navbar-right-content">
+        <button class="cart-btn" data-cart-toggle aria-label="Open cart">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.137a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+          Cart <span class="cart-count hidden">0</span>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="minecraft.html">Minecraft Hosting</a>
+  <a href="vps.html">VPS</a>
+  <a href="domains.html">Domains</a>
+  <a href="reseller.html">Reseller</a>
+  <a href="orders.html" data-auth-show="logged-in" style="display:none">My Orders</a>
+</div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-grid-lines"></div>
+  <div class="container" style="position:relative;z-index:1">
+
+    <div class="hero-label">
+      <span class="live-dot"></span>
+      Enterprise-Grade Infrastructure · India
+    </div>
+
+    <h1>Power Your Minecraft Server<br>With Enterprise Infrastructure</h1>
+
+    <p>NVMe SSD storage, AMD EPYC &amp; Intel Xeon processors, DDoS protection — all under one roof. Instant deployment across India.</p>
+
+    <div class="hero-actions">
+      <a href="minecraft.html" class="btn btn-primary btn-lg">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+        Start Server
+      </a>
+      <a href="#services" class="btn btn-secondary btn-lg">
+        View Plans
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+      </a>
+    </div>
+
+    <div class="hero-pills">
+      <div class="hero-pill"><span class="pill-dot">✓</span> 99.9% Uptime SLA</div>
+      <div class="hero-pill"><span class="pill-dot">✓</span> NVMe SSD on all plans</div>
+      <div class="hero-pill"><span class="pill-dot">✓</span> DDoS Protection included</div>
+      <div class="hero-pill"><span class="pill-dot">✓</span> Delhi Datacenter</div>
+      <div class="hero-pill"><span class="pill-dot">✓</span> Instant Deployment</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<section class="section-sm">
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-number">99.9%</div>
+        <div class="stat-label">Uptime SLA</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">NVMe</div>
+        <div class="stat-label">SSD Storage</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">AMD</div>
+        <div class="stat-label">EPYC Processors</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Support</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Services</span>
+      <h2>Everything you need to deploy</h2>
+      <p>From Minecraft servers to enterprise VPS — infrastructure built for speed, reliability, and scale.</p>
+    </div>
+
+    <div id="services-grid">
+      <div class="service-card">
+        <div class="service-icon">⛏️</div>
+        <div>
+          <h3>Minecraft Hosting</h3>
+          <p>AMD EPYC Premium &amp; Intel Xeon Budget nodes. Plans from 2GB to 64GB RAM with daily backups.</p>
+        </div>
+        <div class="service-features">
+          <div class="service-feature"><span class="sf-check">✓</span> Budget from ₹70/mo · Premium from ₹120/mo</div>
+          <div class="service-feature"><span class="sf-check">✓</span> NVMe SSD · Automated daily backups</div>
+          <div class="service-feature"><span class="sf-check">✓</span> All modpacks &amp; versions supported</div>
+        </div>
+        <a href="minecraft.html" class="btn btn-secondary" style="margin-top:auto">View Plans →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">🖥️</div>
+        <div>
+          <h3>VPS Servers</h3>
+          <p>Choose AMD EPYC (Premium) or Intel Xeon (Budget) VPS. Full root access, Delhi datacenter.</p>
+        </div>
+        <div class="service-features">
+          <div class="service-feature"><span class="sf-check">✓</span> Budget from ₹399/mo · Premium from ₹799/mo</div>
+          <div class="service-feature"><span class="sf-check">✓</span> Full root access · 500GB bandwidth</div>
+          <div class="service-feature"><span class="sf-check">✓</span> Instant provisioning</div>
+        </div>
+        <a href="vps.html" class="btn btn-secondary" style="margin-top:auto">View Plans →</a>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">🌐</div>
+        <div>
+          <h3>Domain Names</h3>
+          <p>Register your perfect domain. Competitive annual pricing with free WHOIS privacy on all registrations.</p>
+        </div>
+        <div class="service-features">
+          <div class="service-feature"><span class="sf-check">✓</span> .com from ₹319/yr</div>
+          <div class="service-feature"><span class="sf-check">✓</span> Free WHOIS privacy</div>
+          <div class="service-feature"><span class="sf-check">✓</span> 8+ TLDs available</div>
+        </div>
+        <a href="domains.html" class="btn btn-secondary" style="margin-top:auto">View Pricing →</a>
+      </div>
+
+      <div class="service-card reseller-card">
+        <div class="service-icon">🚀</div>
+        <div>
+          <h3>Reseller Program</h3>
+          <p>Launch your own branded hosting company on CoreNode infrastructure. Sell, earn credits, and grow.</p>
+        </div>
+        <div class="service-features">
+          <div class="service-feature"><span class="sf-check">✓</span> Only ₹299/month — no setup fees</div>
+          <div class="service-feature"><span class="sf-check">✓</span> Auto provisioning · Unlimited stock</div>
+          <div class="service-feature"><span class="sf-check">✓</span> Branded dashboard &amp; custom domain</div>
+        </div>
+        <a href="reseller.html" class="btn btn-secondary" style="margin-top:auto">Start Reselling →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WHY US ═══ -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Why CoreNode</span>
+      <h2>Infrastructure you can rely on</h2>
+    </div>
+    <div class="features-strip">
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+        </div>
+        <h4>NVMe SSD Storage</h4>
+        <p>Enterprise-grade NVMe on every plan for maximum IOPS and minimal latency.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+        </div>
+        <h4>DDoS Protection</h4>
+        <p>Always-on network-level mitigation to keep your servers online 24/7.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"/></svg>
+        </div>
+        <h4>Automated Backups</h4>
+        <p>Daily backups on all plans. Your data is always safe and restorable.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h4>Instant Deployment</h4>
+        <p>Servers ready within minutes of payment. No waiting, no manual setup.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NODE TYPES ═══ -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">Hardware</span>
+      <h2>Choose your node</h2>
+      <p>Two hardware tiers to match every budget and performance need.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;" id="node-cards-grid">
+      <!-- Intel -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(100,180,255,.2),transparent)"></div>
+        <div style="font-size:1.5rem;margin-bottom:1rem">💠</div>
+        <div style="font-family:var(--font-heading);font-size:.78rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#60a5fa;margin-bottom:.5rem">Budget Node</div>
+        <h3 style="color:var(--text-primary);margin-bottom:.6rem;font-size:1.1rem">Intel Xeon E3-1245 v5</h3>
+        <p style="font-size:.83rem;color:var(--text-secondary);line-height:1.65;margin-bottom:1.25rem">Solid server-grade processors for standard Minecraft servers and lightweight VPS workloads.</p>
+        <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.8rem;color:var(--text-secondary);margin-bottom:1.5rem">
+          <div>⚡ Minecraft from <strong style="color:#60a5fa">₹35/GB RAM</strong></div>
+          <div>🖥️ VPS from <strong style="color:#60a5fa">₹399/mo</strong></div>
+        </div>
+        <a href="minecraft.html" class="btn btn-secondary" style="font-size:.8rem;padding:.5rem 1.1rem;border-color:rgba(100,180,255,.3);color:#93c5fd">Explore Budget Plans →</a>
+      </div>
+      <!-- AMD -->
+      <div style="background:linear-gradient(135deg,#131f2e 0%,var(--bg-card) 100%);border:1px solid rgba(0,255,156,.25);border-radius:var(--radius-lg);padding:2rem;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,255,156,.05)">
+        <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,156,.4),transparent)"></div>
+        <div style="font-size:1.5rem;margin-bottom:1rem">🔥</div>
+        <div style="font-family:var(--font-heading);font-size:.78rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem">Premium Node</div>
+        <h3 style="color:var(--text-primary);margin-bottom:.6rem;font-size:1.1rem">AMD EPYC 9004 Series</h3>
+        <p style="font-size:.83rem;color:var(--text-secondary);line-height:1.65;margin-bottom:1.25rem">Next-gen EPYC cores with superior single-thread performance. Recommended for modpacks and large communities.</p>
+        <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.8rem;color:var(--text-secondary);margin-bottom:1.5rem">
+          <div>⚡ Minecraft from <strong style="color:var(--accent);text-shadow:0 0 12px rgba(0,255,156,.4)">₹120/GB RAM</strong></div>
+          <div>🖥️ VPS from <strong style="color:var(--accent);text-shadow:0 0 12px rgba(0,255,156,.4)">₹799/mo</strong></div>
+        </div>
+        <a href="minecraft.html" class="btn btn-primary" style="font-size:.8rem;padding:.5rem 1.1rem">Explore Premium Plans →</a>
+      </div>
+    </div>
+    <style>#node-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}@media(max-width:640px){#node-cards-grid{grid-template-columns:1fr}}</style>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="cta-banner">
+      <span class="section-label" style="display:block;margin-bottom:.75rem">Get Started Today</span>
+      <h2 style="margin-bottom:.75rem;position:relative">Ready to launch your server?</h2>
+      <p style="color:var(--text-secondary);margin-bottom:2.25rem;max-width:480px;margin-left:auto;margin-right:auto;position:relative;font-size:.95rem">Choose a plan and deploy in minutes. No long-term contracts. Cancel anytime.</p>
+      <div style="display:flex;gap:.85rem;justify-content:center;flex-wrap:wrap;position:relative">
+        <a href="minecraft.html" class="btn btn-primary btn-lg">⛏️ Minecraft Hosting</a>
+        <a href="vps.html" class="btn btn-secondary btn-lg">🖥️ VPS Servers</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="navbar-logo" style="margin-bottom:.75rem">
+          <div class="logo-icon">CN</div>
+          CoreNode
+        </div>
+        <p>Professional hosting infrastructure for businesses, developers, and gaming communities in India.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Products</h5>
+        <ul>
+          <li><a href="minecraft.html">Minecraft Hosting</a></li>
+          <li><a href="vps.html">VPS Servers</a></li>
+          <li><a href="domains.html">Domain Names</a></li>
+          <li><a href="reseller.html">Reseller Program</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Account</h5>
+        <ul>
+          <li data-auth-show="logged-in" style="display:none"><a href="orders.html" data-auth-show="logged-in" style="display:none">My Orders</a></li>
+          <li><a href="#">Support</a></li>
+          <li><a href="#">Status</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Refund Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 CoreNode. All rights reserved.</span>
+      <span style="color:var(--accent)">Hosting for India 🇮🇳</span>
+    </div>
+  </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar" aria-label="Shopping cart">
+  <div class="cart-header">
+    <h3>Shopping Cart</h3>
+    <button class="cart-close" data-cart-close aria-label="Close cart">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-amount" id="cart-total-amount">₹0</span>
+    </div>
+    <div class="cart-actions">
+      <button class="btn btn-ghost btn-sm" id="cart-clear">Clear Cart</button>
+      <button class="btn btn-primary" id="cart-checkout" style="flex:1">Checkout</button>
+    </div>
+  </div>
+</aside>
+
+<script>
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase.js"></script>
+<script src="assets/js/navbar-auth.js"></script>
+<script src="config/pricing.js"></script>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/checkout.js"></script>
+</body>
+</html>

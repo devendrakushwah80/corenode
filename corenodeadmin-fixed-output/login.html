@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login – CoreNode</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; background: var(--bg-base); }
+    .auth-card { width: 100%; max-width: 420px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2.5rem 2rem; position: relative; overflow: hidden; }
+    .auth-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, var(--purple-light, #9d5cf6) 70%, transparent 100%); }
+    .auth-logo { display: flex; align-items: center; gap: 0.6rem; justify-content: center; margin-bottom: 2rem; font-size: 1.1rem; font-weight: 800; font-family: 'Orbitron', sans-serif; color: var(--text-primary); text-decoration: none; }
+    .auth-logo .logo-icon { background: linear-gradient(135deg, var(--accent), #00c97a); color: #000; font-weight: 900; font-size: 0.85rem; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,255,156,.35); }
+    .auth-title { text-align: center; margin-bottom: 1.75rem; }
+    .auth-title h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .auth-title p { font-size: 0.85rem; color: var(--text-secondary); }
+    .auth-divider { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 1.25rem 0; position: relative; }
+    .auth-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); }
+    .auth-divider span { background: var(--bg-card); padding: 0 0.75rem; position: relative; }
+    .auth-footer { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-secondary); }
+    .auth-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .auth-footer a:hover { text-decoration: underline; }
+    .auth-error { background: rgba(220,38,38,.1); border: 1px solid rgba(220,38,38,.3); color: #f87171; border-radius: var(--radius); padding: 0.75rem 1rem; font-size: 0.83rem; margin-bottom: 1rem; display: none; }
+    .auth-success { background: rgba(22,163,74,.1); border: 1px solid rgba(22,163,74,.3); color: #4ade80; border-radius: var(--radius); padding: 0.75rem 1rem; font-size: 0.83rem; margin-bottom: 1rem; display: none; }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <a href="index.html" class="auth-logo">
+      <div class="logo-icon">CN</div>
+      CoreNode
+    </a>
+
+    <div class="auth-title">
+      <h1>Welcome back</h1>
+      <p>Sign in to manage your servers and orders</p>
+    </div>
+
+    <div id="auth-error" class="auth-error"></div>
+    <div id="auth-success" class="auth-success"></div>
+
+    <div class="form-group">
+      <label class="form-label" for="login-email">Email Address</label>
+      <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="login-password">Password</label>
+      <input class="form-input" id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" id="login-btn" style="margin-top:0.5rem">
+      Sign In
+    </button>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="signup.html">Create one →</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    // If already logged in, redirect
+    const session = await AuthManager.init();
+    if (session) {
+      const params = new URLSearchParams(window.location.search);
+      window.location.href = params.get('redirect') || 'dashboard.html';
+      return;
+    }
+
+    const btn      = document.getElementById('login-btn');
+    const errEl    = document.getElementById('auth-error');
+    const succEl   = document.getElementById('auth-success');
+    const emailEl  = document.getElementById('login-email');
+    const passEl   = document.getElementById('login-password');
+
+    function showError(msg) { errEl.textContent = msg; errEl.style.display = 'block'; succEl.style.display = 'none'; }
+    function showSuccess(msg) { succEl.textContent = msg; succEl.style.display = 'block'; errEl.style.display = 'none'; }
+
+    async function doLogin() {
+      const email    = emailEl.value.trim();
+      const password = passEl.value;
+      if (!email || !password) { showError('Please enter your email and password.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in…';
+      errEl.style.display = 'none';
+
+      const { error } = await AuthManager.signIn(email, password);
+      if (error) {
+        showError(error.message || 'Sign in failed. Please check your credentials.');
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+        return;
+      }
+
+      showSuccess('Signed in! Redirecting…');
+      const params = new URLSearchParams(window.location.search);
+      setTimeout(() => { window.location.href = params.get('redirect') || 'dashboard.html'; }, 800);
+    }
+
+    btn.addEventListener('click', doLogin);
+    [emailEl, passEl].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+  });
+</script>
+</body>
+</html>

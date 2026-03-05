@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraft Hosting – CoreNode</title>
+  <meta name="description" content="Minecraft server hosting with AMD EPYC and Intel Xeon nodes. Plans from ₹70/month." />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    /* Node toggle enhancement */
+    .node-selector-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .node-toggle-wrap { margin-bottom: 0; }
+    .node-selector-label {
+      font-size: .68rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--text-muted);
+      font-family: var(--font); margin-bottom: .6rem;
+    }
+    .node-info-bar { margin-bottom: 0; }
+
+    /* Features ribbon */
+    .features-ribbon {
+      display: flex; flex-wrap: wrap; gap: .65rem 2rem;
+      align-items: center; padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .82rem; color: var(--text-secondary);
+      font-family: var(--font);
+    }
+    .features-ribbon-item {
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .features-ribbon-item .rb-dot {
+      color: var(--accent); font-weight: 700;
+    }
+
+    /* Plan section heading */
+    .plan-section { margin-bottom: 3.5rem; }
+    .plan-section-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 1.75rem;
+      padding-bottom: .9rem; border-bottom: 1px solid var(--border);
+    }
+    .plan-section-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .plan-section-icon.basic    { background: rgba(0,255,156,.08); border: 1px solid rgba(0,255,156,.15); }
+    .plan-section-icon.perf     { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.15); }
+    .plan-section-icon.enterprise { background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.2); }
+    .plan-section-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+    .plan-section-sub   { font-size: .8rem; color: var(--text-muted); margin-top: .15rem; font-family: var(--font); }
+
+    /* FAQ accordion */
+    .faq-item {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      transition: border-color .2s;
+    }
+    .faq-item:hover { border-color: var(--border-light); }
+    .faq-question {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 1.35rem; cursor: pointer;
+      font-size: .9rem; font-weight: 600; color: var(--text-primary);
+      font-family: var(--font); border: none; background: none; width: 100%;
+      text-align: left; gap: 1rem;
+    }
+    .faq-answer {
+      padding: 0 1.35rem 1.1rem;
+      font-size: .85rem; color: var(--text-secondary); line-height: 1.65;
+      font-family: var(--font);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="container">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="logo-icon">CN</div>
+        CoreNode
+      </a>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="minecraft.html" class="active">Minecraft</a></li>
+        <li><a href="vps.html">VPS</a></li>
+        <li><a href="domains.html">Domains</a></li>
+        <li><a href="reseller.html">Reseller</a></li>
+        <li><a href="orders.html">My Orders</a></li>
+      </ul>
+      <div class="navbar-right" id="navbar-right-content">
+        <button class="cart-btn" data-cart-toggle aria-label="Open cart">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.137a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"/></svg>
+          Cart <span class="cart-count hidden">0</span>
+        </button>
+        <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="minecraft.html">Minecraft Hosting</a>
+  <a href="vps.html">VPS</a>
+  <a href="domains.html">Domains</a>
+  <a href="reseller.html">Reseller</a>
+  <a href="orders.html">My Orders</a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="container">
+    <span class="section-label">⛏️ Minecraft Hosting</span>
+    <h1>Minecraft Server Plans</h1>
+    <p>Choose your hardware node. Switch between Budget (Intel Xeon) and Premium (AMD EPYC) for different performance and price tiers.</p>
+  </div>
+</section>
+
+<!-- FEATURES RIBBON -->
+<div style="border-bottom:1px solid var(--border);background:var(--bg-secondary);">
+  <div class="container">
+    <div class="features-ribbon">
+      <div class="features-ribbon-item"><span class="rb-dot">✓</span> NVMe SSD Storage</div>
+      <div class="features-ribbon-item"><span class="rb-dot">✓</span> DDoS Protection</div>
+      <div class="features-ribbon-item"><span class="rb-dot">✓</span> Automated Daily Backups</div>
+      <div class="features-ribbon-item"><span class="rb-dot">✓</span> Instant Setup</div>
+      <div class="features-ribbon-item"><span class="rb-dot">✓</span> All Modpacks Supported</div>
+      <div class="features-ribbon-item"><span class="rb-dot">✓</span> 99.9% Uptime SLA</div>
+    </div>
+  </div>
+</div>
+
+<!-- NODE TOGGLE + PLANS -->
+<section class="section">
+  <div class="container">
+
+    <!-- Node Selector -->
+    <div style="margin-bottom:2.5rem;">
+      <div class="node-selector-label">Select Hardware Node</div>
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:1rem;">
+        <div class="node-toggle-wrap">
+          <button class="node-toggle-btn" id="btn-intel" onclick="switchNode('intel')">
+            💠 Intel Xeon E3-1245 v5
+            <span class="node-badge">Budget</span>
+          </button>
+          <button class="node-toggle-btn active" id="btn-amd" onclick="switchNode('amd')">
+            🔥 AMD EPYC 9004 Series
+            <span class="node-badge">Premium</span>
+          </button>
+        </div>
+        <div class="node-info-bar" id="node-info-bar">
+          <span>🖥️</span>
+          <span>Node: <span class="node-cpu-name" id="node-cpu-label">AMD EPYC 9004 Series</span></span>
+          <span class="sep">|</span>
+          <span id="node-price-label" style="color:var(--accent);font-weight:700">₹120/GB RAM</span>
+          <span class="sep">|</span>
+          <span id="node-tier-label">Premium Performance</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic Series -->
+    <div class="plan-section">
+      <div class="plan-section-header">
+        <div class="plan-section-icon basic">🌱</div>
+        <div>
+          <div class="plan-section-title" id="basic-heading">Basic Series</div>
+          <div class="plan-section-sub">Perfect for small SMPs &amp; starter servers</div>
+        </div>
+      </div>
+      <div class="pricing-grid" id="mc-basic-grid"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Performance Series -->
+    <div class="plan-section">
+      <div class="plan-section-header">
+        <div class="plan-section-icon perf">🔥</div>
+        <div>
+          <div class="plan-section-title">Performance Series</div>
+          <div class="plan-section-sub">Smooth performance for growing communities</div>
+        </div>
+      </div>
+      <div class="pricing-grid" id="mc-perf-grid"></div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Enterprise Series -->
+    <div class="plan-section">
+      <div class="plan-section-header">
+        <div class="plan-section-icon enterprise">👑</div>
+        <div>
+          <div class="plan-section-title">Enterprise Series</div>
+          <div class="plan-section-sub">Built for large networks &amp; competitive servers</div>
+        </div>
+      </div>
+      <div class="pricing-grid-2" id="mc-enterprise-grid"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" style="padding-top:0;padding-bottom:5rem">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-label">FAQ</span>
+      <h2>Common questions</h2>
+    </div>
+    <div style="display:grid;gap:.75rem;" id="faq-grid">
+      <div class="faq-item">
+        <button class="faq-question">
+          What's the difference between Budget and Premium nodes?
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">Budget nodes run on Intel Xeon E3-1245 v5 processors and are great for standard Minecraft servers. Premium AMD EPYC 9004 nodes offer higher single-thread performance and are recommended for modpacks and large player counts.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          What Minecraft versions are supported?
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">All versions from 1.8 to the latest, including Spigot, Paper, Purpur, Fabric, Forge, and modpacks on both nodes.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          Can I upgrade my plan later?
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">Yes. Upgrade anytime. Contact support and we'll migrate with zero downtime.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">
+          How do backups work?
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">Daily backups included on every plan. Stored for 7 days, restorable on request.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h3>Shopping Cart</h3>
+    <button class="cart-close" data-cart-close>
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-amount" id="cart-total-amount">₹0</span>
+    </div>
+    <div class="cart-actions">
+      <button class="btn btn-ghost btn-sm" id="cart-clear">Clear Cart</button>
+      <button class="btn btn-primary" id="cart-checkout" style="flex:1">Checkout</button>
+    </div>
+  </div>
+</aside>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom" style="justify-content:center;border-top:none;padding-top:0;">
+      <span>© 2025 CoreNode. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobile-menu').classList.toggle('open');
+  });
+
+  // FAQ grid responsive
+  function adjustFaqGrid() {
+    const grid = document.getElementById('faq-grid');
+    if (grid) grid.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : 'repeat(2,1fr)';
+  }
+  window.addEventListener('resize', adjustFaqGrid);
+  adjustFaqGrid();
+
+  // ── Plan card renderer ────────────────────────────────────────────────────
+  function renderPlanCard(plan) {
+    const livePlan = (typeof PlanManager !== 'undefined') ? (PlanManager.getPlanById(plan.id) || plan) : plan;
+    const stock    = livePlan.stock ?? 99;
+    const soldOut  = stock === 0;
+    const lowStock = stock > 0 && stock <= 3;
+    const featured = !!livePlan.tag;
+    const nodeLabel = livePlan.node === 'intel' ? '💠 Intel Xeon' : '🔥 AMD EPYC';
+    const nodeCls   = livePlan.node === 'intel' ? 'color:#60a5fa' : 'color:var(--accent)';
+
+    const stockBadge = soldOut
+      ? `<span class="sold-out-badge">✕ Sold Out</span>`
+      : lowStock ? `<span class="stock-low-badge">⚠ ${stock} left</span>` : '';
+
+    return `
+      <div class="plan-card ${featured ? 'featured' : ''} ${soldOut ? 'sold-out' : ''}">
+        ${livePlan.tag ? `<div class="plan-tag">${livePlan.tag}</div>` : ''}
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.25rem;">
+          <div class="plan-name">${livePlan.name}</div>
+          ${stockBadge}
+        </div>
+        <div class="plan-node-badge" style="${nodeCls}">${nodeLabel}</div>
+        <div class="plan-price">
+          <span class="currency">₹</span>
+          <span class="amount">${livePlan.price.toLocaleString('en-IN')}</span>
+          <span class="period">/month</span>
+        </div>
+        <ul class="plan-specs">
+          <li><span class="spec-emoji">🧠</span><span>${livePlan.ram}</span> RAM</li>
+          <li><span class="spec-emoji">⚙️</span><span>${livePlan.vcores}</span> vCore${livePlan.vcores > 1 ? 's' : ''}</li>
+          <li><span class="spec-emoji">💾</span><span>${livePlan.nvme}</span> NVMe SSD</li>
+          <li><span class="spec-emoji">🔄</span><span>${livePlan.backups}</span> Backup${livePlan.backups > 1 ? 's' : ''}</li>
+        </ul>
+        <button class="btn btn-primary btn-full" ${soldOut ? 'disabled style="opacity:.5;cursor:not-allowed"' : ''}
+          onclick='${soldOut ? '' : `Cart.add({id:"${livePlan.id}",name:"${livePlan.name}",type:"Minecraft Hosting",price:${livePlan.price}})`}'>
+          ${soldOut ? 'Sold Out' : 'Add to Cart'}
+        </button>
+      </div>`;
+  }
+
+  function renderGrid(plans, containerId) {
+    const el = document.getElementById(containerId);
+    if (el) el.innerHTML = plans.map(p => renderPlanCard(p)).join('');
+  }
+
+  // ── Node switcher ─────────────────────────────────────────────────────────
+  let currentNode = 'amd';
+
+  const nodeConfig = {
+    amd: {
+      cpu:   'AMD EPYC 9004 Series',
+      price: '₹120/GB RAM',
+      tier:  'Premium Performance',
+      basic:      () => CNA_PRICING.minecraft.basic,
+      performance:() => CNA_PRICING.minecraft.performance,
+      enterprise: () => CNA_PRICING.minecraft.enterprise,
+    },
+    intel: {
+      cpu:   'Intel Xeon E3-1245 v5',
+      price: '₹35/GB RAM',
+      tier:  'Budget Node',
+      basic:      () => CNA_PRICING.minecraft_xeon.basic,
+      performance:() => CNA_PRICING.minecraft_xeon.performance,
+      enterprise: () => CNA_PRICING.minecraft_xeon.enterprise,
+    }
+  };
+
+  function switchNode(node) {
+    currentNode = node;
+    const cfg = nodeConfig[node];
+
+    // Update toggle buttons
+    document.getElementById('btn-amd').classList.toggle('active', node === 'amd');
+    document.getElementById('btn-intel').classList.toggle('active', node === 'intel');
+
+    // Update info bar
+    document.getElementById('node-cpu-label').textContent   = cfg.cpu;
+    document.getElementById('node-price-label').textContent = cfg.price;
+    document.getElementById('node-tier-label').textContent  = cfg.tier;
+
+    // Re-render grids
+    renderGrid(cfg.basic(),       'mc-basic-grid');
+    renderGrid(cfg.performance(), 'mc-perf-grid');
+    renderGrid(cfg.enterprise(),  'mc-enterprise-grid');
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase.js"></script>
+<script src="assets/js/navbar-auth.js"></script>
+<script src="config/pricing.js"></script>
+<script>
+  // Initial render on AMD (default)
+  switchNode('amd');
+</script>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/checkout.js"></script>
+</body>
+</html>
